@@ -1,0 +1,10 @@
+temp
+Documents
+*.json
+*.txt
+*.zip
+*.csv
+*.ipynb
+.DS_Store
+.idea
+S3/data
