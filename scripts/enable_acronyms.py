@@ -1,15 +1,16 @@
 import requests
 import argparse
+from utils.file_reader import get_list_from_resources
 
 
-def parseArguments():
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("env", choices=['dev', 'live'],
                         help="Select environment")
     return parser.parse_args()
 
 
-def enableAcronym(endpoint, acronym):
+def enable_acronym(endpoint, acronym):
     headers = {
         'Content-Type': 'application/json',
         'Accept': 'text/plain',
@@ -19,7 +20,7 @@ def enableAcronym(endpoint, acronym):
     return response
 
 
-def getTopicArn(env):
+def get_topic_arn(env):
     if env == "live":
         return 'https://recs-reviewers-recommender.api.recs.d.elsevier.com/recommendations/journals/enable/'
     elif env == "dev":
@@ -29,10 +30,8 @@ def getTopicArn(env):
 
 
 if __name__ == '__main__':
-    args = parseArguments()
-    topic = getTopicArn(args.env)
+    args = parse_arguments()
+    topic = get_topic_arn(args.env)
 
-    with open("acronyms.txt", "r") as f:
-        data = f.readlines()
-    for acronym in data:
-        enableAcronym(topic, acronym.strip("\n"))
+    for acronym in get_list_from_resources('acronyms.txt'):
+        enable_acronym(topic, acronym)
