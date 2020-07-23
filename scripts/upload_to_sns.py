@@ -8,7 +8,7 @@ from utils.env_helper import get_account_number
 SNS = boto3.client('sns')
 
 
-def parseArguments():
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("env", choices=['dev', 'live'],
                         help="Select environment")
@@ -19,29 +19,25 @@ def parseArguments():
     return parser.parse_args()
 
 
-def readJsonFile(filepath):
+def process_json_file(filepath):
     with open(filepath) as json_file:
         data = json.load(json_file)
         data['action'] = "new"
     return compress_msg(json.dumps(data))
 
 
-def main():
+def load_files_to_sns(topic_arn, path, limit):
     counter = 0
-    for fileName in os.listdir(PATH):
+    for fileName in os.listdir(path):
         if '.json' in fileName:
-            response = send_to_sns(SNS, readJsonFile(PATH + fileName), TOPIC_ARN)
+            response = send_to_sns(SNS, process_json_file(path + fileName), topic_arn)
             counter += 1
-            if response != 200:
-                print(response, counter, fileName)
-            if counter == LIMIT:
+            print(response, counter, fileName)
+            if counter == limit:
                 break
-        print(counter, fileName)
 
 
 if __name__ == '__main__':
-    args = parseArguments()
-    TOPIC_ARN = "arn:aws:sns:us-east-1:{}:recs-rev-manuscripts-data-pump-mock".format(get_account_number(args.env))
-    LIMIT = args.limit
-    PATH = args.path
-    main()
+    args = parse_arguments()
+    topic = "arn:aws:sns:us-east-1:{}:recs-rev-manuscripts-data-pump-mock".format(get_account_number(args.env))
+    load_files_to_sns(topic, args.path, args.limit)
